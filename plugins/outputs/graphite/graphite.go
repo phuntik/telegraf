@@ -37,6 +37,7 @@ type Graphite struct {
 	GraphiteStrictRegex     string `toml:"graphite_strict_sanitize_regex"`
 	// URL is only for backwards compatibility
 	Servers   []string        `toml:"servers"`
+	Bind      string          `toml:"bind"`
 	Prefix    string          `toml:"prefix"`
 	Template  string          `toml:"template"`
 	Templates []string        `toml:"templates"`
@@ -102,8 +103,22 @@ func (g *Graphite) Connect() error {
 		}
 		newConnection = true
 
-		// Dialer with timeout
-		d := net.Dialer{Timeout: time.Duration(g.Timeout)}
+		// Set src addr
+		localAddr, err := net.ResolveIPAddr("ip", g.Bind)
+		if err != nil {
+			g.Log.Errorf("Invalid address to bind: %v", g.Bind)
+			panic(err)
+		}
+
+		localTCPAddr := net.TCPAddr{
+			IP: localAddr.IP,
+		}
+
+		// Dialer with timeout and src addr
+		d := net.Dialer{
+			LocalAddr: &localTCPAddr,
+			Timeout:   time.Duration(g.Timeout),
+		}
 
 		// Get secure connection if tls config is set
 		var conn net.Conn

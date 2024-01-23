@@ -26,6 +26,8 @@ See the [CONFIGURATION.md][CONFIGURATION.md] for more details.
   ## If multiple endpoints are configured, the output will be load balanced.
   ## Only one of the endpoints will be written to with each iteration.
   servers = ["localhost:2003"]
+  ## TCP source address to send metrics from.
+  bind = "192.168.0.10"
   ## Prefix metrics name
   prefix = ""
   ## Graphite output template
